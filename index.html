@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Game Player</title>
+<style>
+  :root{
+    --player-width: 880px;
+    --player-height: 520px;
+    --radius: 18px;
+    --menu-height: 56px;
+    --bg: #050505;
+  }
+
+  html,body{
+    margin:0;
+    height:100%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:#0b0b0b;
+    padding:24px;
+    font-family:Inter, system-ui;
+    color:#eee;
+  }
+
+  .player-wrap{
+    width:100%;
+    max-width:var(--player-width);
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    align-items:center;
+  }
+
+  .player{
+    position:relative;
+    width:100%;
+    height:var(--player-height);
+    background:var(--bg);
+    border-radius:var(--radius);
+    overflow:hidden;
+    border:1px solid rgba(255,255,255,0.05);
+    box-shadow:0 10px 30px rgba(0,0,0,0.6);
+  }
+
+  .squiggle-canvas{
+    position:absolute;
+    inset:0;
+    z-index:1;
+    pointer-events:none;
+    mix-blend-mode:screen;
+  }
+
+  .game-frame{
+    position:absolute;
+    inset:0;
+    border:none;
+    z-index:2;
+    width:100%;
+    height:100%;
+  }
+
+  .player-menu{
+    width:100%;
+    max-width:var(--player-width);
+    height:var(--menu-height);
+    background:rgba(255,255,255,0.02);
+    border-radius:12px;
+    border:1px solid rgba(255,255,255,0.04);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:8px 12px;
+  }
+
+  .btn{
+    background:transparent;
+    border:1px solid rgba(255,255,255,0.06);
+    color:#eaeaea;
+    padding:8px 12px;
+    border-radius:10px;
+    cursor:pointer;
+    font-size:14px;
+    user-select:none;
+  }
+
+  .btn:hover{ transform:translateY(-1px); }
+  .btn:active{ transform:translateY(0); }
+
+  @media(max-width:900px){
+    :root{ --player-height:380px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="player-wrap">
+
+  <div class="player" id="player">
+    <canvas class="squiggle-canvas" id="squiggle"></canvas>
+    <iframe class="game-frame" id="gameFrame" src="game.html"></iframe>
+  </div>
+
+  <div class="player-menu">
+    <button class="btn" id="homeBtn">Home</button>
+    <button class="btn" id="fsBtn">Fullscreen</button>
+  </div>
+
+</div>
+
+<script>
+/* ---------- Fullscreen ---------- */
+const player = document.getElementById("player");
+const fsBtn = document.getElementById("fsBtn");
+
+async function toggleFS(){
+  if (!document.fullscreenElement){
+    await player.requestFullscreen();
+    fsBtn.textContent = "Exit";
+  } else {
+    await document.exitFullscreen();
+    fsBtn.textContent = "Fullscreen";
+  }
+}
+fsBtn.onclick = toggleFS;
+
+/* ---------- Home Button (go back a folder → home.html) ---------- */
+document.getElementById("homeBtn").onclick = () => {
+  window.location.href = "../home.html";
+};
+
+/* ---------- Squiggly Background ---------- */
+const canvas = document.getElementById("squiggle");
+const ctx = canvas.getContext("2d");
+
+let DPR = window.devicePixelRatio || 1;
+
+function resize(){
+  const r = canvas.getBoundingClientRect();
+  canvas.width = r.width * DPR;
+  canvas.height = r.height * DPR;
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+}
+resize();
+window.addEventListener("resize", resize);
+
+const LCOUNT = 6;
+const lines = [];
+
+function initLines(){
+  lines.length = 0;
+  const w = canvas.clientWidth;
+  const h = canvas.clientHeight;
+
+  for(let i=0;i<LCOUNT;i++){
+    lines.push({
+      y: h*(0.1 + 0.8*(i/(LCOUNT-1))),
+      speed: 0.2 + Math.random()*0.5,
+      offset: Math.random()*200,
+      color: "rgba(120,200,255,0.05)"
+    });
+  }
+}
+initLines();
+
+function draw(now){
+  ctx.clearRect(0,0,canvas.width, canvas.height);
+
+  const w = canvas.clientWidth;
+  for(const L of lines){
+    ctx.beginPath();
+    for(let x=0;x<=w;x+=20){
+      const y = L.y + Math.sin((x*0.01) + now*0.001*L.speed + L.offset)*18;
+      if(x===0) ctx.moveTo(x,y);
+      else ctx.lineTo(x,y);
+    }
+    ctx.strokeStyle = L.color;
+    ctx.lineWidth = 2;
+    ctx.stroke();
+  }
+
+  requestAnimationFrame(draw);
+}
+
+requestAnimationFrame(draw);
+</script>
+</body>
+</html>
