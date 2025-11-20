@@ -6,8 +6,8 @@
 <title>Game Player</title>
 <style>
   :root{
-    --player-width: 1200px;   /* bigger */
-    --player-height: 720px;   /* bigger */
+    --player-width: 1200px;   /* wider only */
+    --player-height: 520px;   /* same height */
     --radius: 18px;
     --menu-height: 56px;
     --bg: #050505;
@@ -90,11 +90,11 @@
   .btn:active{ transform:translateY(0); }
 
   @media(max-width:1300px){
-    :root{ --player-width:1000px; --player-height:600px; }
+    :root{ --player-width:1000px; }
   }
 
   @media(max-width:1050px){
-    :root{ --player-width:880px; --player-height:520px; }
+    :root{ --player-width:880px; }
   }
 </style>
 </head>
@@ -131,7 +131,6 @@ async function toggleFS(){
 fsBtn.onclick = toggleFS;
 
 /* ---------- Home Button ---------- */
-/* goes back one folder → loads home.html */
 document.getElementById("homeBtn").onclick = () => {
   window.location.href = "../home.html";
 };
